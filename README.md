@@ -28,4 +28,3 @@ Users may define the appearance of live and dead cells.
 7.  If all the cells die, 'game over' message will show, but will not exit unless a single 'x' is entered.
 8.  'x' will always exit the simulation rounds.
 9.  In case of a 'still life,' no special message will show even though each round will return a same outcome.
-10. Hope this makes sense to you.  Thank you so much.
