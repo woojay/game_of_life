@@ -48,7 +48,7 @@ def main(stdscr):
 
     get_symbol(stdscr, 'dead', 5)
 
-    init_universe()
+    init_universe(universe)
 
     # Users may pick a number of seeds or their own
     get_seeds(stdscr)
@@ -61,14 +61,99 @@ def main(stdscr):
         stdscr.clear()
 
         show_universe(stdscr)
+        stdscr.addstr(height+2, 0, 'Enter x to exit.  Enter any other key to continue to next round')
 
+        # GOL goes on
+        propagate(stdscr)
 
-
-        key = stdscr.getch()
-        if (chr(key) == 'x'):   # 'x' exits the game
+        key = chr(stdscr.getch())
+        if (key == 'x'):   # 'x' exits the game
             exit()
 
-    # GOL goes on
+        else:
+        # elif (key == curses.ascii.SP):  # next round
+            continue
+
+def propagate(stdscr):
+
+    global universe, next_universe
+
+    cell_count = 0
+
+    init_universe(next_universe)
+
+    for i in range(height):
+        for j in range(width):
+            # stdscr.addstr(i, j, universe[i][j])
+
+            # Count number of neighbors
+            neighbors = count_neighbors(universe, i, j, stdscr)
+
+            # If live, and;
+            if universe[i][j] == live:
+                # Starvation
+                if neighbors < 2:
+                    next_universe[i][j] = dead
+                # Move on but stay the same
+                elif neighbors == 2 or neighbors == 3:
+                    next_universe[i][j] = live
+                    cell_count += 1
+                # Overpopulation
+                elif neighbors > 3:
+                    next_universe[i][j] = dead
+
+            # if Dead
+            else:
+                # Reproduction
+                if neighbors == 3:
+                    next_universe[i][j] = live
+                    cell_count += 1
+
+    stdscr.addstr(16, 0, str(cell_count))
+    if cell_count == 0:
+        stdscr.addstr(17, 0, 'game over')
+
+    else:
+        universe = next_universe
+
+def count_neighbors(univ, y, x, stdscr):
+
+    global height, width
+
+    # Y Minimum
+    if y <= 1:
+        y_min = 0
+    else:
+        y_min = y - 1
+
+    # Y Maximum
+    if y >= height - 2:
+        y_max = height - 1
+    else:
+        y_max = y + 1
+
+    # X Minimum
+    if x <= 1:
+        x_min = 0
+    else:
+        x_min = x - 1
+
+    # X Maximum
+    if x >= width - 2:
+        x_max = width - 1
+    else:
+        x_max = x + 1
+
+    neighbor_count = 0
+    for i in range(y_min, y_max):
+        for j in range(x_min, x_max):
+            if univ[i][j] == live:
+                neighbor_count += 1
+
+    stdscr.addstr(19, 0, str(neighbor_count))
+
+    return neighbor_count
+
 
 def get_manual_seeds(stdscr):
 
@@ -171,14 +256,14 @@ def clear_display(stdscr):
         stdscr.addstr(line, 0, blankline)
 
 
-def init_universe():
+def init_universe(univ):
     '''
     Clears universe data for live and dead cells
     '''
 
     for i in range(height):
         for j in range(width):
-            universe[i][j] = dead
+            univ[i][j] = dead
 
 
 def random_seeds(seeds):
