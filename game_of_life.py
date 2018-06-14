@@ -18,6 +18,8 @@ import curses
 import curses.ascii
 import time
 import random
+import logging
+
 
 # User selectable live / dead cell symbols
 live = 'O'
@@ -35,6 +37,8 @@ next_universe = [[0 for y in range(width)] for x in range(height)]
 def main(stdscr):
 
     global live, dead
+
+    logging.basicConfig(filename='log.log', level=logging.DEBUG)
 
     curses.cbreak()
     curses.noecho()
@@ -87,7 +91,7 @@ def propagate(stdscr):
             # stdscr.addstr(i, j, universe[i][j])
 
             # Count number of neighbors
-            neighbors = count_neighbors(universe, i, j, stdscr) 
+            neighbors = count_neighbors(universe, i, j, stdscr)
 
             # If live, and;
             if universe[i][j] == live:
@@ -145,12 +149,20 @@ def count_neighbors(univ, y, x, stdscr):
         x_max = x + 1
 
     neighbor_count = 0
-    for i in range(y_min, y_max):
-        for j in range(x_min, x_max):
+    for i in range(y_min, y_max+1):
+        for j in range(x_min, x_max+1):
+            if i == y and j == x:
+                continue
             if univ[i][j] == live:
                 neighbor_count += 1
 
-    stdscr.addstr(19, 0, str(neighbor_count))
+    # if univ[i][j] == live:
+    #     neighbor_count -= 1
+
+    # stdscr.addstr(19, 0, str(neighbor_count))
+    if neighbor_count:
+        message = '@ {}-{}-{}:{}-{}-{} count {}'.format(y_min, y, y_max, x_min, x, x_max, neighbor_count)
+        logging.debug(message)
 
     return neighbor_count
 
