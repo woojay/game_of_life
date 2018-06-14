@@ -1,3 +1,18 @@
+'''
+    Game of Life CLI version
+
+    by wp
+    6/13/18
+
+    Objective:
+    You'll implement Conway's Game of Life (https://en.wikipedia.org/wiki/Conway's_Game_of_Life) as a CLI tool.
+
+    Criteria:
+    Conway's Game of Life is displayed in the terminal.
+    Conway's Game of Life plays indefinitely until a user terminates.
+    Users may pick a number of starting states(seeds) or enter their own.
+    Users may define the appearance of live and dead cells.
+'''
 
 import curses
 import curses.ascii
@@ -12,8 +27,10 @@ dead = '.'
 height=10
 width=40
 
+# game space (universe for the cell population
 universe = [[0 for y in range(width)] for x in range(height)]
 next_universe = [[0 for y in range(width)] for x in range(height)]
+
 
 def main(stdscr):
 
@@ -108,6 +125,10 @@ def get_manual_seeds(stdscr):
 
 
 def get_seeds(stdscr):
+    '''
+    Initial setup for seed placement in the game space (universe)
+    :param stdscr: screen
+    '''
 
     stdscr.addstr(7, 0, 'How many seeds would you like to randomly place?')
     stdscr.addstr(8, 0, 'Enter a number between 1 and 9 or 0 for manual placement: ')
@@ -133,7 +154,12 @@ def get_seeds(stdscr):
 
     clear_display(stdscr)
 
+
 def clear_display(stdscr):
+    '''
+    Clears display window
+\    '''
+
     height, width = stdscr.getmaxyx()
 
     blankline = ' ' * (width-1)
@@ -143,12 +169,20 @@ def clear_display(stdscr):
 
 
 def init_universe():
+    '''
+    Clears universe data for live and dead cells
+    '''
+
     for i in range(height):
         for j in range(width):
             universe[i][j] = dead
 
 
 def random_seeds(seeds):
+    '''
+    Adds a few random seeds based on input
+    :param seeds: number of seeds to add
+    '''
     for seed in range(seeds):
         rand_y = random.randint(0, height-1)
         rand_x = random.randint(0, width-1)
@@ -161,13 +195,22 @@ def random_seeds(seeds):
 
 
 def show_universe(stdscr):
+    '''
+    Displays the game space (universe)
+    :param stdscr:
+    '''
     for i in range(height):
         for j in range(width):
             stdscr.addstr(i, j, universe[i][j])
 
 
 def get_symbol(stdscr, target, y):
-
+    '''
+    Gets user customized symbols for either live or dead cells for display
+    :param stdscr: screen
+    :param target: live or dead cell
+    :param y: display height for screen
+    '''
     global dead, live
 
     stdscr.addstr(y, 0, 'Enter a symbol for a {} cell: '.format(target))
