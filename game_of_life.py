@@ -59,10 +59,13 @@ def main(stdscr):
     # GOL is displayed on the terminal
     while True:
         stdscr.clear()
+
         show_universe(stdscr)
 
+
+
         key = stdscr.getch()
-        if (chr(key) == 'x'):
+        if (chr(key) == 'x'):   # 'x' exits the game
             exit()
 
     # GOL goes on
@@ -84,7 +87,7 @@ def get_manual_seeds(stdscr):
         key = chr(stdscr.getch())
 
         if key == 'q': # Finish
-            clear_display(stdscr)
+            stdscr.clear()
             return
 
         elif key == 'a': # Left
@@ -135,7 +138,7 @@ def get_seeds(stdscr):
 
     seeds = stdscr.getch()
 
-    clear_display(stdscr)
+    stdscr.clear()
 
     if curses.ascii.isdigit(seeds):
         stdscr.refresh()
@@ -152,7 +155,7 @@ def get_seeds(stdscr):
         stdscr.addstr(9, 0, 'Sorry, wrong input')
         exit()
 
-    clear_display(stdscr)
+    stdscr.clear()
 
 
 def clear_display(stdscr):
