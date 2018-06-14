@@ -1,16 +1,14 @@
 
-# import blessings
 import curses
 import curses.ascii
-
 import time
-
 import random
 
+# User selectable live / dead cell symbols
 live = 'O'
 dead = '.'
 
-
+# global screen size of cell universe
 height=10
 width=40
 
@@ -36,25 +34,7 @@ def main(stdscr):
     init_universe()
 
     # Users may pick a number of seeds or their own
-    stdscr.addstr(7, 0, 'How many seeds would you like to randomly place?')
-    stdscr.addstr(8, 0, 'Enter a number between 1 and 9 or 0 for manual placement: ')
-
-    seeds = stdscr.getch()
-
-    if curses.ascii.isdigit(seeds):
-        stdscr.refresh()
-
-    if seeds >= 49 and seeds <= 57:
-        stdscr.addstr(9, 0, 'Randomly placing {} seeds'.format(seeds-48))
-        random_seeds(seeds-48)
-
-    elif seeds == 48:
-        stdscr.addstr(9, 0, 'Manual input selected')
-        get_manual_seeds(stdscr)
-
-    else:
-        stdscr.addstr(9, 0, 'Sorry, wrong input')
-        exit()
+    get_seeds(stdscr)
 
     stdscr.refresh()
     time.sleep(1)
@@ -63,7 +43,6 @@ def main(stdscr):
     while True:
         stdscr.clear()
         show_universe(stdscr)
-
 
         key = stdscr.getch()
         if (chr(key) == 'x'):
@@ -88,6 +67,7 @@ def get_manual_seeds(stdscr):
         key = chr(stdscr.getch())
 
         if key == 'q': # Finish
+            clear_display(stdscr)
             return
 
         elif key == 'a': # Left
@@ -126,6 +106,42 @@ def get_manual_seeds(stdscr):
 
         stdscr.refresh()
 
+
+def get_seeds(stdscr):
+
+    stdscr.addstr(7, 0, 'How many seeds would you like to randomly place?')
+    stdscr.addstr(8, 0, 'Enter a number between 1 and 9 or 0 for manual placement: ')
+
+    seeds = stdscr.getch()
+
+    clear_display(stdscr)
+
+    if curses.ascii.isdigit(seeds):
+        stdscr.refresh()
+
+    if seeds >= 49 and seeds <= 57:
+        stdscr.addstr(9, 0, 'Randomly placing {} seeds'.format(seeds-48))
+        random_seeds(seeds-48)
+
+    elif seeds == 48:
+        stdscr.addstr(9, 0, 'Manual input selected')
+        get_manual_seeds(stdscr)
+
+    else:
+        stdscr.addstr(9, 0, 'Sorry, wrong input')
+        exit()
+
+    clear_display(stdscr)
+
+def clear_display(stdscr):
+    height, width = stdscr.getmaxyx()
+
+    blankline = ' ' * (width-1)
+
+    for line in range(height):
+        stdscr.addstr(line, 0, blankline)
+
+
 def init_universe():
     for i in range(height):
         for j in range(width):
@@ -163,9 +179,6 @@ def get_symbol(stdscr, target, y):
             live = chr(c)
         elif target == 'dead':
             dead = chr(c)
-
-
-
 
 
 if __name__ == '__main__':
