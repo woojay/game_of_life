@@ -106,19 +106,23 @@ def propagate(stdscr):
                 elif neighbors > 3:
                     next_universe[i][j] = dead
 
+                logging.debug('{}->{}'.format(universe[i][j], next_universe[i][j]))
             # if Dead
-            else:
+            elif universe[i][j] == dead:
                 # Reproduction
                 if neighbors == 3:
                     next_universe[i][j] = live
                     cell_count += 1
+                logging.debug('{}->{}'.format(universe[i][j], next_universe[i][j]))
 
-    stdscr.addstr(16, 0, str(cell_count))
+    # copy over
+    for i in range(height):
+        for j in range(width):
+            universe[i][j] = next_universe[i][j]
+
     if cell_count == 0:
         stdscr.addstr(17, 0, 'game over')
 
-    else:
-        universe = next_universe
 
 def count_neighbors(univ, y, x, stdscr):
 
