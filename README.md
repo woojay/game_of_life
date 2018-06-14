@@ -9,7 +9,7 @@ Conway's Game of Life plays indefinitely until a user terminates.
 Users may pick a number of starting states(seeds) or enter their own.
 Users may define the appearance of live and dead cells.
 
-## Instruction:## 
+## Instruction: ## 
 
 - Setup
 0.  '(sudo) pip install curses' if needed
