@@ -87,7 +87,7 @@ def propagate(stdscr):
             # stdscr.addstr(i, j, universe[i][j])
 
             # Count number of neighbors
-            neighbors = count_neighbors(universe, i, j, stdscr)
+            neighbors = count_neighbors(universe, i, j, stdscr) 
 
             # If live, and;
             if universe[i][j] == live:
