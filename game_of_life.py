@@ -52,34 +52,36 @@ dead = '.'
 height=10
 width=40
 
-# game space (universe for the cell population
+# game space (universe for the cell population)
 universe = [[0 for y in range(width)] for x in range(height)]
-next_universe = [[0 for y in range(width)] for x in range(height)]
-
 
 def main(stdscr):
+    '''
+    Main Game Logic
+    :param stdscr: screen
+    '''
 
-    global live, dead
+    # global live, dead
 
-    logging.basicConfig(filename='log.log', level=logging.DEBUG)
+    logging.basicConfig(filename='log.log', level=logging.ERROR)
+    # logging.basicConfig(filename='log.log', level=logging.DEBUG)
 
     curses.cbreak()
     curses.noecho()
 
-    stdscr.addstr(0, 0, '---------------------------')
-    stdscr.addstr(1, 0, '       Game of life')
-    stdscr.addstr(2, 0, '---------------------------')
+    # Welcome / instruction screens
+    show_intro(stdscr)
+    show_banner(stdscr)
 
     # Users may define the live and dead cells
     get_symbol(stdscr, 'live', 3)
-
     get_symbol(stdscr, 'dead', 5)
 
+    # Get game space ready
     init_universe(universe)
 
     # Users may pick a number of seeds or their own
     get_seeds(stdscr)
-
     stdscr.refresh()
     time.sleep(1)
 
@@ -87,23 +89,68 @@ def main(stdscr):
     while True:
         stdscr.clear()
 
+        # Show current state of universe
         show_universe(stdscr)
         stdscr.addstr(height+2, 0, 'Enter x to exit.  Enter any other key to continue to next round')
 
-        # GOL goes on
+        # GOL goes on to next round
         propagate(stdscr)
 
+        # Wait for a key to progress to next round or x for exiting the simulation
         key = chr(stdscr.getch())
         if (key == 'x'):   # 'x' exits the game
             exit()
 
-        else:
-        # elif (key == curses.ascii.SP):  # next round
-            continue
+
+def show_banner(stdscr):
+
+    stdscr.addstr(0, 0, '---------------------------')
+    stdscr.addstr(1, 0, '       Game of life')
+    stdscr.addstr(2, 0, '---------------------------')
+
+
+def show_intro(stdscr):
+
+    stdscr.clear()
+    show_banner(stdscr)
+
+    stdscr.addstr(4, 0, 'Welcome!')
+
+    stdscr.addstr(6, 0, 'The Conway\' Game of Life is rather a cellular automaton where you')
+    stdscr.addstr(7, 0, 'start with initial set of cells you can manually or randomly place.')
+
+    stdscr.addstr(9, 0, 'The rules of the game are as follows:')
+    stdscr.addstr(10, 0, "For a space that is 'live' or 'populated':")
+    stdscr.addstr(11, 0, '  Each cell with one or no neighbors dies, as if by solitude.')
+    stdscr.addstr(12, 0, '  Each cell with four or more neighbors dies, as if by overpopulation.')
+    stdscr.addstr(13, 0, '  Each cell with two or three neighbors survives.')
+    stdscr.addstr(14, 0, "For a space that is 'dead' or 'empty'")
+    stdscr.addstr(15, 0, '  Each cell with three neighbors becomes populated.')
+
+    stdscr.addstr(17, 0, 'On the next screen, you will start by selecting your preferred symbol')
+    stdscr.addstr(18, 0, 'to represent populated cells and empty cells.')
+
+    stdscr.addstr(20, 0, 'When ready, please hit spacebar to continue.')
+
+    # Wait for a keyboard input to move on
+    while True:
+        c = stdscr.getch()
+
+        if chr(c) == ' ':
+            break
+
+    stdscr.clear()
+
 
 def propagate(stdscr):
+    '''
+    Runs a single round of simulation
+    :param stdscr: screen
+    '''
 
-    global universe, next_universe
+    global universe
+
+    next_universe = [[0 for y in range(width)] for x in range(height)]
 
     cell_count = 0
 
@@ -125,18 +172,18 @@ def propagate(stdscr):
                 elif neighbors == 2 or neighbors == 3:
                     next_universe[i][j] = live
                     cell_count += 1
+                    logging.debug('{}->{}'.format(universe[i][j], next_universe[i][j]))
                 # Overpopulation
                 elif neighbors > 3:
                     next_universe[i][j] = dead
 
-                logging.debug('{}->{}'.format(universe[i][j], next_universe[i][j]))
             # if Dead
             elif universe[i][j] == dead:
                 # Reproduction
                 if neighbors == 3:
                     next_universe[i][j] = live
                     cell_count += 1
-                logging.debug('{}->{}'.format(universe[i][j], next_universe[i][j]))
+                    logging.debug('{}->{}'.format(universe[i][j], next_universe[i][j]))
 
     # copy over
     for i in range(height):
@@ -148,7 +195,13 @@ def propagate(stdscr):
 
 
 def count_neighbors(univ, y, x, stdscr):
-
+    '''
+    Determines the number of populated cells around a target cell
+    :param univ: Target array universe
+    :param y: Row
+    :param x: Column
+    :param stdscr: screen
+    '''
     global height, width
 
     # Y Minimum
@@ -183,10 +236,6 @@ def count_neighbors(univ, y, x, stdscr):
             if univ[i][j] == live:
                 neighbor_count += 1
 
-    # if univ[i][j] == live:
-    #     neighbor_count -= 1
-
-    # stdscr.addstr(19, 0, str(neighbor_count))
     if neighbor_count:
         message = '@ {}-{}-{}:{}-{}-{} count {}'.format(y_min, y, y_max, x_min, x, x_max, neighbor_count)
         logging.debug(message)
@@ -195,22 +244,26 @@ def count_neighbors(univ, y, x, stdscr):
 
 
 def get_manual_seeds(stdscr):
+    '''
+    Receive user's manual seed placements w/ keyboard input
+    :param stdscr: screen
+    '''
 
-    global height, width
+    global height, width, universe
+
     show_universe(stdscr)
 
-    stdscr.addstr(height + 2, 0, 'Use arrow keys to move.  Enter a space to place a seed. Enter q to exit. ')
-    # stdscr.addstr(height + 3, 0, 'a / d for left / right, w / x for up / down.')
+    stdscr.addstr(height + 2, 0, 'Use arrow keys to move.  Enter a space to place a seed. Hit END key to finish. ')
 
     x = 0
     y = 0
 
     key = ''
 
-    while key != 'q':
+    while True:
         key = stdscr.getch()
 
-        if chr(key) == 'q': # Finish
+        if key == curses.KEY_END: # END to finish entering
             stdscr.clear()
             return
 
@@ -237,8 +290,6 @@ def get_manual_seeds(stdscr):
                 y = 0
             else:
                 y = y + 1
-
-        # curses.setsyx(y, x)
 
         if chr(key) == ' ': # Place Seed
             stdscr.addstr(y, x, live)
@@ -270,8 +321,9 @@ def get_seeds(stdscr):
             stdscr.refresh()
 
         if seeds >= 49 and seeds <= 57:
-            stdscr.addstr(10, 0, 'Randomly placing {} seeds'.format(seeds-48))
-            random_seeds((seeds-48) * 10)
+            seeds_count = (seeds - 48) * 10
+            stdscr.addstr(10, 0, 'Randomly placing {} seeds'.format(seeds_count))
+            random_seeds(seeds_count)
             break
 
         elif seeds == 48:
@@ -340,17 +392,32 @@ def get_symbol(stdscr, target, y):
     :param target: live or dead cell
     :param y: display height for screen
     '''
+
     global dead, live
 
-    stdscr.addstr(y, 0, 'Enter a symbol for a {} cell: '.format(target))
-    c = stdscr.getch()
+    while True:
 
-    if curses.ascii.isalnum(c):
-        stdscr.addstr(y+1, 0, chr(c))
         if target == 'live':
-            live = chr(c)
+            stdscr.addstr(y, 0, 'Enter an alphanumeric key to indicate a {} cell: '.format(target))
+            c = stdscr.getch()
+
+            if curses.ascii.isalnum(c):
+                stdscr.addstr(y + 1, 0, chr(c) + ' is selected.                       ')
+                live = chr(c)
+                break
+            else:
+                stdscr.addstr(y + 1, 0, 'Only alphanumeric symbol is allowed.')
+
         elif target == 'dead':
-            dead = chr(c)
+            stdscr.addstr(y, 0, 'Enter an alphanumeric key or space to indicate a {} cell: '.format(target))
+            c = stdscr.getch()
+
+            if curses.ascii.isalnum(c) or chr(c) == ' ':
+                stdscr.addstr(y + 1, 0, chr(c) + ' is selected.                       ')
+                dead = chr(c)
+                break
+            else:
+                stdscr.addstr(y + 1, 0, 'Only alphanumeric symbol or space is allowed.')
 
 
 if __name__ == '__main__':
