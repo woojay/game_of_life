@@ -144,7 +144,7 @@ def propagate(stdscr):
             universe[i][j] = next_universe[i][j]
 
     if cell_count == 0:
-        stdscr.addstr(17, 0, 'game over')
+        stdscr.addstr(17, 0, 'No more cells left.')
 
 
 def count_neighbors(univ, y, x, stdscr):
@@ -199,8 +199,8 @@ def get_manual_seeds(stdscr):
     global height, width
     show_universe(stdscr)
 
-    stdscr.addstr(height + 2, 0, 'Use keyboard to move.  Enter s to place a seed. Enter q to exit. ')
-    stdscr.addstr(height + 3, 0, 'a / d for left / right, w / x for up / down.')
+    stdscr.addstr(height + 2, 0, 'Use arrow keys to move.  Enter a space to place a seed. Enter q to exit. ')
+    # stdscr.addstr(height + 3, 0, 'a / d for left / right, w / x for up / down.')
 
     x = 0
     y = 0
@@ -208,31 +208,31 @@ def get_manual_seeds(stdscr):
     key = ''
 
     while key != 'q':
-        key = chr(stdscr.getch())
+        key = stdscr.getch()
 
-        if key == 'q': # Finish
+        if chr(key) == 'q': # Finish
             stdscr.clear()
             return
 
-        elif key == 'a': # Left
+        elif key == curses.KEY_LEFT: # Left
             if x == 0:
                 x = width - 1
             else:
                 x = x - 1
 
-        elif key == 'd': # Right
+        elif key == curses.KEY_RIGHT: # Right
             if x >= width-1:
                 x = 0
             else:
                 x = x + 1
 
-        elif key == 'w': # Up
+        elif key == curses.KEY_UP: # Up
             if y == 0:
                 y = height - 1
             else:
                 y = y - 1
 
-        elif key == 'x': # Down
+        elif key == curses.KEY_DOWN: # Down
             if y >= height-1:
                 y = 0
             else:
@@ -240,7 +240,7 @@ def get_manual_seeds(stdscr):
 
         # curses.setsyx(y, x)
 
-        if key == 's': # Place Seed
+        if chr(key) == ' ': # Place Seed
             stdscr.addstr(y, x, live)
             stdscr.addstr(y, x, '')     # Moves back the cursor after write
             universe[y][x] = live
@@ -257,29 +257,31 @@ def get_seeds(stdscr):
     :param stdscr: screen
     '''
 
-    stdscr.addstr(7, 0, 'How many seeds would you like to randomly place?')
-    stdscr.addstr(8, 0, 'Enter a number between 1 and 9 or 0 for manual placement: ')
+    while True:
+        stdscr.addstr(7, 0, 'How would you like to place initial cells?')
+        stdscr.addstr(8, 0, 'Enter a number between 1 and 9 for 10 to 90 random seeds -OR-')
+        stdscr.addstr(9, 0, '0 to place your own: ')
 
-    seeds = stdscr.getch()
+        seeds = stdscr.getch()
 
-    stdscr.clear()
+        stdscr.clear()
 
-    if curses.ascii.isdigit(seeds):
-        stdscr.refresh()
+        if curses.ascii.isdigit(seeds):
+            stdscr.refresh()
 
-    if seeds >= 49 and seeds <= 57:
-        stdscr.addstr(9, 0, 'Randomly placing {} seeds'.format(seeds-48))
-        random_seeds(seeds-48)
+        if seeds >= 49 and seeds <= 57:
+            stdscr.addstr(10, 0, 'Randomly placing {} seeds'.format(seeds-48))
+            random_seeds((seeds-48) * 10)
+            break
 
-    elif seeds == 48:
-        stdscr.addstr(9, 0, 'Manual input selected')
-        get_manual_seeds(stdscr)
+        elif seeds == 48:
+            stdscr.addstr(10, 0, 'Manual input selected')
+            get_manual_seeds(stdscr)
+            break
 
-    else:
-        stdscr.addstr(9, 0, 'Sorry, wrong input')
-        exit()
-
-    stdscr.clear()
+        else:
+            stdscr.addstr(10, 0, 'Sorry, wrong input.  Please try again.')
+            # time.sleep(1)
 
 
 def clear_display(stdscr):
